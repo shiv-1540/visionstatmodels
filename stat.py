@@ -5,10 +5,10 @@ import pandas as pd
 import numpy as np
 from scipy.stats import zscore
 from scipy.signal import medfilt
+import uvicorn
 
 app = FastAPI()
 
-# Define the data model
 class DataPoint(BaseModel):
     date: str
     meantemp: float
@@ -20,13 +20,11 @@ class AnomalyDetectionRequest(BaseModel):
     data: List[DataPoint]
 
 
-# Load and preprocess the data
 def load_and_preprocess_data(data: List[Dict]):
     df = pd.DataFrame(data)
     return df
 
 
-# Hampel filter for anomaly detection
 def hampel_filter(series, window_size=7, n_sigma=3):
     median_filtered = medfilt(series, kernel_size=window_size)
     std_dev = np.std(series - median_filtered)
@@ -34,7 +32,6 @@ def hampel_filter(series, window_size=7, n_sigma=3):
     return outliers
 
 
-# Anomaly detection function
 def detect_anomalies(df):
     df["z_score"] = np.abs(zscore(df["meantemp"]))
     df["z_anomaly"] = df["z_score"] > 3
@@ -78,6 +75,6 @@ async def detect_anomalies_api(request: AnomalyDetectionRequest):
 async def test_api():
     return {"message": "API is working!"}
 
-    
-if __name__ == '__main__':
-    app.run(debug=True)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
