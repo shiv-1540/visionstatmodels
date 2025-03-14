@@ -7,3 +7,4 @@ joblib
 typing
 pydantic
 scipy
+uvicorn
